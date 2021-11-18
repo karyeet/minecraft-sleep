@@ -1,72 +1,64 @@
+/* This sorta works*/
+
 const mcping = require("minecraft-pinger");
 const net = require('net');
+const { suspend, resume } = require('ntsuspend');
 const { spawn } = require("child_process")
 const options = require("./options.json")
 
-console.log("Started server")
-// initial start of server
-let McServerChild = spawn("java", ["-Xmx"+options.ramToServer, "-Xms"+options.ramToServer, "-jar", options.mcServerExecutablePath],{"cwd":options.mcWorkingDirectory})
+console.log("Starting server...")
+const McServerChild = spawn("java", ["-jar","-Xmx"+options.ramToServer, options.mcServerExecutablePath],{"cwd":options.mcWorkingDirectory})
 
-let checkPlayersAndServerRunning = false
+let checkPlayersAndServerRunning = true
 
-// set timeout to start checking for players again
-setTimeout(()=>{ 
-	checkPlayersAndServerRunning = true;
-},options.SecondsToWaitForServerToStart*1000)
-
-let shutdownTimeout = false
+let freezeTimeout = false
 
 const server = net.createServer();
 server.on('connection', socket => {
 	console.log('Connection attempted on port 25565');
 	
-	//socket.write(Buffer.from('Hello World'));
 	socket.on('data',(dataBuffer)=>{
 		console.log("A player attempted to connect!")
+		checkPlayersAndServerRunning = true;
 
-		server.close();
-		server.on("close",()=>{
-			//start server
-			McServerChild = spawn("java", ["-Xmx"+options.ramToServer, "-Xms"+options.ramToServer, "-jar", options.mcServerExecutablePath],{"cwd":options.mcWorkingDirectory})
-			console.log("Started server")
-			setTimeout(()=>{ // set timeout to start checking for players again
-				checkPlayersAndServerRunning = true;
-			},options.SecondsToWaitForServerToStart*1000)
-		})
+		//child unfreeze
+		resume(McServerChild.pid);
 	})
 });
+server.listen({ port: 25566, family: 'IPv4', address: '127.0.0.1' });
 
-
-setInterval(()=>{ //☺☺ username of pinger
-	if(checkPlayersAndServerRunning){
-		mcping.pingPromise('localhost', 25565)
-		.then((mcInfo)=>{
-			if(mcInfo.players.online==0){
-				console.log("No Players Online")
-				//if this is the second check it has been 0 players
-				if(shutdownTimeout){
-					console.log("Shutting down server")
-					checkPlayersAndServerRunning = false;
-					McServerChild.stdin.write("stop\n")
-					shutdownTimeout = false;
-					McServerChild.on("close",()=>{
-						console.log("Server shutdown")
-						server.listen({ port: 25566, family: 'IPv4', address: '127.0.0.1' });
-					})
+McServerChild.on("spawn",()=>{
+	setInterval(()=>{ //☺☺ username of pinger
+		if(checkPlayersAndServerRunning){
+			mcping.pingPromise('localhost', 25565)
+			.then((mcInfo)=>{
+				if(mcInfo.players.online==0){
+					console.log("No Players Online")
+					//if this is the second check it has been 0 players
+					if(freezeTimeout){
+						console.log("Second check, still no players, freezing process")
+						checkPlayersAndServerRunning = false;
+						//child freeze
+						suspend(McServerChild.pid);
+						freezeTimeout = false;
+					}else{
+						//otherwise mark this as the first check
+						freezeTimeout = true;
+					}
 				}else{
-					//otherwise mark this as the first check
-					shutdownTimeout = true;
+					console.log(mcInfo.players.online+" Players Online")
+					McServerChild.stdin.write("say hey\n")
+					// there are players
+					freezeTimeout = false;
 				}
-			}else{
-				console.log(mcInfo.players.online+" Players Online");
-				// there are players
-				shutdownTimeout = false;
 			}
+			)
+			.catch(()=>{/* dont care */})
 		}
-		)
-		.catch(()=>{/* dont care */})
-	}
-}, options.SecondsInBetweenPlayerChecks)
+	}, options.SecondsInBetweenPlayerChecks)
+})
+
+
 
 /*
 {
