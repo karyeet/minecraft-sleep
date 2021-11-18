@@ -2,8 +2,8 @@
 Safley shutdown you minecraft server when there are no players online and start when someone tries to connect.
 
 ## To setup:
-1. Install npm and node.js
-2. Download the & unzip files from this repository
+1. Install [node.js](https://nodejs.org/en/download/)
+2. Download the & unzip files from this repository into their own folder
 3. Configure options.json
 4. Run `npm install` inside the folder containing files from this repository
 
