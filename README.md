@@ -1,4 +1,6 @@
 # minecraft-sleep
+This branch will pause the process instead of closing it but it doesnt work very well cause then we cant bind to port 25565
+
 Safley shutdown you minecraft server when there are no players online and start when someone tries to connect.
 
 ## To setup:
