@@ -5,10 +5,10 @@ Safely shutdown you minecraft server when there are no players online and start 
 1. Install [node.js](https://nodejs.org/en/download/)
 2. Download the & unzip files from this repository into their own folder
 3. Configure options.json
-4. Run `npm install` inside the folder containing files from this repository
+4. Open command prompt and run `npm install` inside the folder containing files from this repository
 
 ## To Start:
-1. Run `node .` inside the folder containing files from this repository
+1. Open command prompt and run `node .` inside the folder containing files from this repository
 
 ## To Stop:
 1. If your minecraft server is running, shutdown your minecraft server using `stop` inside the GUI
