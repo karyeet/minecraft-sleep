@@ -1,0 +1,7 @@
+{
+	"mcServerExecutablePath":"C:/Users/yourusername/Desktop/testserver/server.jar",
+	"mcWorkingDirectory":"C:/Users/yourusername/Desktop/testserver/",
+	"ramToServer": "4G",
+	"SecondsToWaitForServerToStart":120,
+	"SecondsInBetweenPlayerChecks": 60
+}
