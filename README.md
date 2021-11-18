@@ -1,5 +1,5 @@
 # minecraft-sleep
-Safley shutdown you minecraft server when there are no players online and start when someone tries to connect.
+Safely shutdown you minecraft server when there are no players online and start when someone tries to connect.
 
 ## To setup:
 1. Install [node.js](https://nodejs.org/en/download/)
